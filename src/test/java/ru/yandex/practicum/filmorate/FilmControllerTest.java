@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate;
 
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +24,18 @@ class FilmControllerTest {
     @DisplayName("Пустое название фильма — ошибка 400")
     void shouldReturnBadRequestWhenNameIsEmpty() throws Exception {
         String filmJson = """
-                {
-                  "name": "",
-                  "description": "Test film",
-                  "releaseDate": "2000-01-01",
-                  "duration": 120
-                }
-                """;
+            {
+                "name": "",
+                "description": "Test film",
+                "releaseDate": "2000-01-01",
+                "duration": 120
+            }
+            """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Название фильма не может быть пустым")));
@@ -44,16 +45,18 @@ class FilmControllerTest {
     @DisplayName("Дата релиза до 28.12.1895 — ошибка 400")
     void shouldReturnBadRequestWhenReleaseDateTooEarly() throws Exception {
         String filmJson = """
-                {
-                  "name": "Old movie",
-                  "description": "Test film",
-                  "releaseDate": "1800-01-01",
-                  "duration": 120
-                }
-                """;
+            {
+                "name": "Old movie",
+                "description": "Test film",
+                "releaseDate": "1800-01-01",
+                "duration": 120
+            }
+            """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Дата релиза не может быть раньше")));
@@ -63,16 +66,18 @@ class FilmControllerTest {
     @DisplayName("Продолжительность отрицательная — ошибка 400")
     void shouldReturnBadRequestWhenDurationNegative() throws Exception {
         String filmJson = """
-                {
-                  "name": "Test film",
-                  "description": "Test film",
-                  "releaseDate": "2000-01-01",
-                  "duration": -10
-                }
-                """;
+            {
+                "name": "Test film",
+                "description": "Test film",
+                "releaseDate": "2000-01-01",
+                "duration": -10
+            }
+            """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Продолжительность фильма должна быть положительной")));

@@ -36,6 +36,8 @@ class UserControllerTest {
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON) // <-- добавили Accept с JSON
+                        .characterEncoding("UTF-8")
                         .content(userJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Email не может быть пустым")));

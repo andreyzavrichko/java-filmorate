@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.handler;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,9 +15,9 @@ public class ErrorHandler {
 
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleValidationException(final ValidationException e) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", e.getMessage()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json; charset=UTF-8");
+        return new ResponseEntity<>(Map.of("error", e.getMessage()), headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
