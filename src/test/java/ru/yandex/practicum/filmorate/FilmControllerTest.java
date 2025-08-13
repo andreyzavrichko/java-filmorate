@@ -23,14 +23,7 @@ class FilmControllerTest {
     @Test
     @DisplayName("Пустое название фильма — ошибка 400")
     void shouldReturnBadRequestWhenNameIsEmpty() throws Exception {
-        String filmJson = """
-            {
-                "name": "",
-                "description": "Test film",
-                "releaseDate": "2000-01-01",
-                "duration": 120
-            }
-            """;
+        String filmJson = "{ \"name\": \"\", \"description\": \"Test film\", \"releaseDate\": \"2000-01-01\", \"duration\": 120 }";
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -44,14 +37,7 @@ class FilmControllerTest {
     @Test
     @DisplayName("Дата релиза до 28.12.1895 — ошибка 400")
     void shouldReturnBadRequestWhenReleaseDateTooEarly() throws Exception {
-        String filmJson = """
-            {
-                "name": "Old movie",
-                "description": "Test film",
-                "releaseDate": "1800-01-01",
-                "duration": 120
-            }
-            """;
+        String filmJson = "{ \"name\": \"Old movie\", \"description\": \"Test film\", \"releaseDate\": \"1800-01-01\", \"duration\": 120 }";
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,14 +51,7 @@ class FilmControllerTest {
     @Test
     @DisplayName("Продолжительность отрицательная — ошибка 400")
     void shouldReturnBadRequestWhenDurationNegative() throws Exception {
-        String filmJson = """
-            {
-                "name": "Test film",
-                "description": "Test film",
-                "releaseDate": "2000-01-01",
-                "duration": -10
-            }
-            """;
+        String filmJson = "{ \"name\": \"Test film\", \"description\": \"Test film\", \"releaseDate\": \"2000-01-01\", \"duration\": -10 }";
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
