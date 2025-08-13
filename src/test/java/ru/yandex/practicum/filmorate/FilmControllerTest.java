@@ -27,8 +27,6 @@ class FilmControllerTest {
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Название фильма не может быть пустым")));
@@ -41,8 +39,6 @@ class FilmControllerTest {
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Дата релиза не может быть раньше")));
@@ -55,8 +51,6 @@ class FilmControllerTest {
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("Продолжительность фильма должна быть положительной")));
