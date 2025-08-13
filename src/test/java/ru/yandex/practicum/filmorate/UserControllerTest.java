@@ -25,14 +25,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Email пустой — ошибка 400")
     void shouldReturnBadRequestWhenEmailEmpty() throws Exception {
-        String userJson = """
-                {
-                  "email": "",
-                  "login": "user1",
-                  "name": "User One",
-                  "birthday": "2000-01-01"
-                }
-                """;
+        String userJson = "{ \"email\": \"\", \"login\": \"user1\", \"name\": \"User One\", \"birthday\": \"2000-01-01\" }";
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -46,14 +39,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Логин с пробелами — ошибка 400")
     void shouldReturnBadRequestWhenLoginContainsSpaces() throws Exception {
-        String userJson = """
-                {
-                  "email": "user@mail.com",
-                  "login": "bad login",
-                  "name": "User One",
-                  "birthday": "2000-01-01"
-                }
-                """;
+        String userJson = "{ \"email\": \"user@mail.com\", \"login\": \"bad login\", \"name\": \"User One\", \"birthday\": \"2000-01-01\" }";
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -66,14 +52,7 @@ class UserControllerTest {
     @DisplayName("Дата рождения в будущем — ошибка 400")
     void shouldReturnBadRequestWhenBirthdayInFuture() throws Exception {
         String futureDate = LocalDate.now().plusDays(1).toString();
-        String userJson = """
-                {
-                  "email": "user@mail.com",
-                  "login": "user1",
-                  "name": "User One",
-                  "birthday": "%s"
-                }
-                """.formatted(futureDate);
+        String userJson = "{ \"email\": \"user@mail.com\", \"login\": \"user1\", \"name\": \"User One\", \"birthday\": \"%s\" }".formatted(futureDate);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
