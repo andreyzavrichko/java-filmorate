@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -29,9 +29,11 @@ class UserControllerTest {
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(userJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Email не может быть пустым")));
+                .andExpect(jsonPath("$.error").value(containsString("Email не может быть пустым")));
     }
 
     @Test
@@ -41,9 +43,11 @@ class UserControllerTest {
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(userJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Логин не может быть пустым или содержать пробелы")));
+                .andExpect(jsonPath("$.error").value(containsString("Логин не может содержать пробелы")));
     }
 
     @Test
@@ -54,8 +58,10 @@ class UserControllerTest {
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(userJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Дата рождения не может быть в будущем")));
+                .andExpect(jsonPath("$.error").value(containsString("Дата рождения не может быть в будущем")));
     }
 }

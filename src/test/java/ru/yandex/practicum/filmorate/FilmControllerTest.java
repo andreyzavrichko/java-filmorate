@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -27,9 +27,11 @@ class FilmControllerTest {
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Название фильма не может быть пустым")));
+                .andExpect(jsonPath("$.error").value(containsString("Название фильма не может быть пустым")));
     }
 
     @Test
@@ -39,9 +41,11 @@ class FilmControllerTest {
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Дата релиза не может быть раньше")));
+                .andExpect(jsonPath("$.error").value(containsString("Дата релиза не может быть раньше")));
     }
 
     @Test
@@ -51,8 +55,10 @@ class FilmControllerTest {
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(containsString("Продолжительность фильма должна быть положительной")));
+                .andExpect(jsonPath("$.error").value(containsString("Продолжительность фильма должна быть положительной")));
     }
 }
