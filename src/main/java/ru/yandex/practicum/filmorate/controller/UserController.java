@@ -18,6 +18,9 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         user.setId(idCounter++);
         users.put(user.getId(), user);
         log.info("Добавлен пользователь: {}", user);
