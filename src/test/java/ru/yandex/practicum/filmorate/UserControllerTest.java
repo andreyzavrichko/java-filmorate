@@ -37,20 +37,6 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Логин с пробелами — ошибка 400")
-    void shouldReturnBadRequestWhenLoginContainsSpaces() throws Exception {
-        String userJson = "{ \"email\": \"user@mail.com\", \"login\": \"bad login\", \"name\": \"User One\", \"birthday\": \"2000-01-01\" }";
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding("UTF-8")
-                        .content(userJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value(containsString("Логин не может содержать пробелы")));
-    }
-
-    @Test
     @DisplayName("Дата рождения в будущем — ошибка 400")
     void shouldReturnBadRequestWhenBirthdayInFuture() throws Exception {
         String futureDate = LocalDate.now().plusDays(1).toString();

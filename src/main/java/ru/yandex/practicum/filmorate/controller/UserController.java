@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.validation.OnCreate;
+import ru.yandex.practicum.filmorate.validation.OnUpdate;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class UserController {
     private int idCounter = 1;
 
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
+    public User addUser(@Validated(OnCreate.class) @RequestBody User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -28,9 +29,12 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
+    public User updateUser(@Validated(OnUpdate.class) @RequestBody User user) {
         if (!users.containsKey(user.getId())) {
-            throw new NotFoundException("Пользователь с таким id не найден");
+            throw new NoSuchElementException("Пользователь с таким id не найден");
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
         users.put(user.getId(), user);
         log.info("Обновлён пользователь: {}", user);
@@ -38,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+    public Collection<User> getAllUsers() {
+        return users.values();
     }
 }

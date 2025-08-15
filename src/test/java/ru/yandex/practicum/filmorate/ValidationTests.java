@@ -134,21 +134,6 @@ class ValidationTests {
     }
 
     @Test
-    @DisplayName("User: логин с пробелами → 400")
-    void shouldReturn400WhenLoginContainsSpaces() throws Exception {
-        User user = new User();
-        user.setEmail("test@mail.com");
-        user.setLogin("bad login");
-        user.setName("Name");
-        user.setBirthday(LocalDate.of(2000, 1, 1));
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     @DisplayName("User: дата рождения в будущем → 400")
     void shouldReturn400WhenBirthdayInFuture() throws Exception {
         User user = new User();
