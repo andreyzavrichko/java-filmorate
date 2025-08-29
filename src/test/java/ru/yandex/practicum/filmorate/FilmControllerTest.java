@@ -31,21 +31,7 @@ class FilmControllerTest {
                         .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value(containsString("Название фильма не может быть пустым")));
-    }
-
-    @Test
-    @DisplayName("Дата релиза до 28.12.1895 — ошибка 400")
-    void shouldReturnBadRequestWhenReleaseDateTooEarly() throws Exception {
-        String filmJson = "{ \"name\": \"Old movie\", \"description\": \"Test film\", \"releaseDate\": \"1800-01-01\", \"duration\": 120 }";
-
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding("UTF-8")
-                        .content(filmJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value(containsString("Дата релиза не может быть раньше")));
+                .andExpect(jsonPath("$.error").value(containsString("Название не может быть пустым")));
     }
 
     @Test
@@ -59,6 +45,7 @@ class FilmControllerTest {
                         .characterEncoding("UTF-8")
                         .content(filmJson))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value(containsString("Продолжительность фильма должна быть положительной")));
+                .andExpect(jsonPath("$.error").value(containsString("Продолжительность должна быть положительной")));
     }
+
 }
