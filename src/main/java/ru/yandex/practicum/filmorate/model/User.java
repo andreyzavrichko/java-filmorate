@@ -6,7 +6,9 @@ import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -25,5 +27,5 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 
-    private final Set<Integer> friends = new HashSet<>();
+    private final Map<Integer, FriendshipStatus> friends = new HashMap<>();
 }

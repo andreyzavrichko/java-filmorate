@@ -29,9 +29,14 @@ public class Film {
 
     private final Set<Integer> likes = new HashSet<>();
 
+    private Set<Genre> genres = new HashSet<>();
+
+    private MpaRating mpa;
+
     @AssertTrue(message = "Дата релиза не может быть раньше 28.12.1895")
     public boolean isReleaseDateValid() {
         return releaseDate == null || !releaseDate.isBefore(CINEMA_BIRTHDAY);
     }
 }
+
 
