@@ -1,25 +1,28 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.FriendshipStorage;
+import ru.yandex.practicum.filmorate.storage.dao.UserStorage;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserStorage userStorage;
+    private final FriendshipStorage friendshipStorage;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage) {
+    public UserServiceImpl(@Qualifier("userDbStorage") UserStorage userStorage, FriendshipStorage friendshipStorage) {
         this.userStorage = userStorage;
+        this.friendshipStorage = friendshipStorage;
     }
 
     @Override
@@ -46,57 +49,42 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Нельзя добавить себя в друзья");
         }
 
-        User user = findById(userId);
-        User friend = findById(friendId);
-        FriendshipStatus userToFriend = user.getFriends().get(friendId);
-        FriendshipStatus friendToUser = friend.getFriends().get(userId);
+        findById(userId);
+        findById(friendId);
 
-        if (userToFriend == FriendshipStatus.UNCONFIRMED && friendToUser == FriendshipStatus.UNCONFIRMED) {
-            user.getFriends().put(friendId, FriendshipStatus.CONFIRMED);
-            friend.getFriends().put(userId, FriendshipStatus.CONFIRMED);
-            return;
+        if (!friendshipStorage.exists(userId, friendId)) {
+            friendshipStorage.add(userId, friendId, "UNCONFIRMED");
         }
-        if (friendToUser == FriendshipStatus.CONFIRMED && userToFriend == FriendshipStatus.CONFIRMED) {
-            return;
-        }
-
-        user.getFriends().put(friendId, FriendshipStatus.UNCONFIRMED);
-
-        friend.getFriends().putIfAbsent(userId, FriendshipStatus.UNCONFIRMED);
     }
 
     @Override
     public void removeFriend(int userId, int friendId) {
-        User user = findById(userId);
-        User friend = findById(friendId);
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        findById(userId);
+        findById(friendId);
+
+        friendshipStorage.delete(userId, friendId);
     }
 
     @Override
     public List<User> getFriends(int userId) {
-        User user = findById(userId);
-        return user.getFriends().entrySet().stream()
-                .filter(entry -> entry.getValue() == FriendshipStatus.CONFIRMED)
-                .map(entry -> findById(entry.getKey()))
+        findById(userId);
+        List<Integer> friendIds = friendshipStorage.getFriends(userId, null);
+        return friendIds.stream()
+                .map(this::findById)
                 .toList();
     }
 
-
     @Override
     public List<User> getCommonFriends(int userId, int otherId) {
-        User user = findById(userId);
-        User other = findById(otherId);
+        findById(userId);
+        findById(otherId);
 
-        var userConfirmed = user.getFriends().entrySet().stream()
-                .filter(e -> e.getValue() == FriendshipStatus.CONFIRMED)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+        Set<Integer> userFriends = new HashSet<>(friendshipStorage.getFriends(userId, null));
+        Set<Integer> otherFriends = new HashSet<>(friendshipStorage.getFriends(otherId, null));
 
-        return other.getFriends().entrySet().stream()
-                .filter(e -> e.getValue() == FriendshipStatus.CONFIRMED)
-                .map(Map.Entry::getKey)
-                .filter(userConfirmed::contains)
+        userFriends.retainAll(otherFriends);
+
+        return userFriends.stream()
                 .map(this::findById)
                 .toList();
     }

@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-public enum FriendshipStatus {
-    UNCONFIRMED,
-    CONFIRMED
+import lombok.Data;
+
+@Data
+public class FriendshipStatus {
+    private int id;
+    private String name;
 }
