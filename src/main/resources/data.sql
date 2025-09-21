@@ -1,11 +1,11 @@
-INSERT INTO mpa_ratings (name) VALUES
+MERGE INTO mpa_ratings (name) KEY(name) VALUES
     ('G'),
     ('PG'),
     ('PG-13'),
     ('R'),
     ('NC-17');
 
-INSERT INTO genres (name) VALUES
+MERGE INTO genres (name) KEY(name) VALUES
     ('Комедия'),
     ('Драма'),
     ('Мультфильм'),
@@ -13,6 +13,6 @@ INSERT INTO genres (name) VALUES
     ('Документальный'),
     ('Боевик');
 
-INSERT INTO friendship_statuses (name) VALUES
+MERGE INTO friendship_statuses (name) KEY(name) VALUES
     ('UNCONFIRMED'),
     ('CONFIRMED');
