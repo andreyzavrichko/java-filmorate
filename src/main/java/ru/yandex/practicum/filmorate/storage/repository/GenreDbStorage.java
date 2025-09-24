@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.storage.dao.GenreStorage;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class GenreDbStorage implements GenreStorage {
@@ -29,4 +31,21 @@ public class GenreDbStorage implements GenreStorage {
         List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(rs.getInt("genre_id"), rs.getString("name")), id);
         return genres.stream().findFirst();
     }
+
+    @Override
+    public List<Genre> getByIds(Set<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        String inSql = ids.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = String.format("SELECT * FROM genres WHERE genre_id IN (%s)", inSql);
+
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Genre(rs.getInt("genre_id"), rs.getString("name")), ids.toArray());
+    }
+
 }

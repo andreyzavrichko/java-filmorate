@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dao.GenreStorage;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class GenreService {
@@ -26,5 +28,12 @@ public class GenreService {
         return genreStorage.getById(id)
                 .orElseThrow(() -> new NotFoundException("Жанр с id " + id + " не найден"));
     }
-}
 
+    public List<Genre> getByIds(Set<Integer> ids) {
+        List<Genre> genres = genreStorage.getByIds(ids);
+        if (genres.size() != ids.size()) {
+            throw new NotFoundException("Некоторые жанры не найдены");
+        }
+        return genres;
+    }
+}
