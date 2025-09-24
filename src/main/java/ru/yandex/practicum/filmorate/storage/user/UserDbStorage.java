@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,9 @@ import ru.yandex.practicum.filmorate.storage.dao.UserStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,6 +25,7 @@ import java.util.Optional;
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final RowMapper<User> userRowMapper = (rs, rowNum) -> mapRowToUser(rs);
 
     @Override
     public User add(User user) {
@@ -80,5 +85,26 @@ public class UserDbStorage implements UserStorage {
             u.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
             return u;
         });
+    }
+
+
+    private User mapRowToUser(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setId(rs.getInt("user_id"));
+        user.setName(rs.getString("name"));
+        user.setEmail(rs.getString("email"));
+        user.setLogin(rs.getString("login"));
+        user.setBirthday(rs.getObject("birthday", LocalDate.class));
+        return user;
+    }
+
+    @Override
+    public List<User> getByIds(List<Integer> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        String inSql = String.join(",", ids.stream().map(id -> "?").toList());
+        String sql = "SELECT * FROM users WHERE user_id IN (" + inSql + ")";
+        return jdbcTemplate.query(sql, userRowMapper, ids.toArray());
     }
 }

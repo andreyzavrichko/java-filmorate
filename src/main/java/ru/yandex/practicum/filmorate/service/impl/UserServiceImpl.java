@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -20,7 +19,7 @@ public class UserServiceImpl implements UserService {
     private final FriendshipStorage friendshipStorage;
 
     @Autowired
-    public UserServiceImpl(@Qualifier("userDbStorage") UserStorage userStorage, FriendshipStorage friendshipStorage) {
+    public UserServiceImpl(UserStorage userStorage, FriendshipStorage friendshipStorage) {
         this.userStorage = userStorage;
         this.friendshipStorage = friendshipStorage;
     }
@@ -68,10 +67,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getFriends(int userId) {
         findById(userId);
+
         List<Integer> friendIds = friendshipStorage.getFriends(userId, null);
-        return friendIds.stream()
-                .map(this::findById)
-                .toList();
+        if (friendIds.isEmpty()) {
+            return List.of();
+        }
+
+        return userStorage.getByIds(friendIds);
     }
 
     @Override
@@ -84,9 +86,11 @@ public class UserServiceImpl implements UserService {
 
         userFriends.retainAll(otherFriends);
 
-        return userFriends.stream()
-                .map(this::findById)
-                .toList();
+        if (userFriends.isEmpty()) {
+            return List.of();
+        }
+
+        return userStorage.getByIds(userFriends.stream().toList());
     }
 
     @Override
