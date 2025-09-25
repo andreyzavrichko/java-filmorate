@@ -5,9 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class Genre {
+@NoArgsConstructor
+public class Mpa {
     private int id;
     private String name;
 }

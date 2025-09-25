@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.dao.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.dao.UserStorage;
+import ru.yandex.practicum.filmorate.storage.repository.FilmLikeStorage;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,15 +19,27 @@ public class FilmServiceImpl implements FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final MpaService mpaService;
+    private final GenreService genreService;
+    private final FilmLikeStorage filmLikeStorage;
 
     @Autowired
-    public FilmServiceImpl(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmServiceImpl(FilmStorage filmStorage,
+                           UserStorage userStorage,
+                           MpaService mpaService,
+                           GenreService genreService,
+                           FilmLikeStorage filmLikeStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.mpaService = mpaService;
+        this.genreService = genreService;
+        this.filmLikeStorage = filmLikeStorage;
     }
 
     @Override
     public Film create(Film film) {
+        validateMpa(film);
+        validateGenres(film);
         return filmStorage.add(film);
     }
 
@@ -34,6 +48,8 @@ public class FilmServiceImpl implements FilmService {
         if (filmStorage.getById(film.getId()).isEmpty()) {
             throw new NotFoundException("Фильм с id " + film.getId() + " не найден");
         }
+        validateMpa(film);
+        validateGenres(film);
         return filmStorage.update(film);
     }
 
@@ -44,33 +60,52 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public void addLike(int filmId, int userId) {
-        Film film = findById(filmId);
+        findById(filmId);
         if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
-        film.getLikes().add(userId);
+        filmLikeStorage.addLike(filmId, userId);
     }
 
     @Override
     public void removeLike(int filmId, int userId) {
-        Film film = findById(filmId);
+        findById(filmId);
         if (userStorage.getById(userId).isEmpty()) {
             throw new NotFoundException("Пользователь с id " + userId + " не найден");
         }
-        film.getLikes().remove(userId);
+        filmLikeStorage.removeLike(filmId, userId);
     }
 
     @Override
     public List<Film> getPopular(int count) {
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt(f -> -f.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmLikeStorage.getMostPopularFilms(count);
     }
 
     @Override
     public Film findById(int id) {
         return filmStorage.getById(id)
                 .orElseThrow(() -> new NotFoundException("Фильм с id " + id + " не найден"));
+    }
+
+    private void validateMpa(Film film) {
+        if (film.getMpa() != null && film.getMpa().getId() > 0) {
+            mpaService.getById(film.getMpa().getId());
+        }
+    }
+
+    private void validateGenres(Film film) {
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            Set<Integer> genreIds = film.getGenres().stream()
+                    .map(Genre::getId)
+                    .filter(id -> id > 0)
+                    .collect(Collectors.toSet());
+
+            if (!genreIds.isEmpty()) {
+                List<Genre> existingGenres = genreService.getByIds(genreIds);
+                if (existingGenres.size() != genreIds.size()) {
+                    throw new NotFoundException("Некоторые жанры не найдены: " + genreIds);
+                }
+            }
+        }
     }
 }
